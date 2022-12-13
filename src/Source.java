@@ -50,7 +50,7 @@ public class Source {
 
     }
 
-public static boolean czy_to_operator( char in_char )
+    public static boolean czy_to_operator( char in_char )
     {
         boolean czy_op = false ;
         int i = 0;
@@ -160,6 +160,90 @@ public static boolean czy_to_operator( char in_char )
 
     }
 
+
+
+    public static int automat_spr_inf( int stan_poprzedni, char wejscie_token )
+    {
+        int stan_nastepny=0;
+
+        char priorytet_tokenu = jaki_priorytet_opa_2(wejscie_token);
+
+
+        if ( stan_poprzedni == 0 )
+        {
+
+            if ( wejscie_token == '(' )
+            {
+                stan_nastepny = 0;
+            } else if ( priorytet_tokenu == '8' )
+            {
+                stan_nastepny = 2;
+            } else if ( jaki_priorytet_opa_2(wejscie_token) == '9' )
+            {
+                stan_nastepny = 1 ;
+            } else if ( wejscie_token == ')' )
+            {
+                stan_nastepny = 4;
+
+            }else if ( (jaki_priorytet_opa_2(wejscie_token) >= '0' ) &&  (jaki_priorytet_opa_2(wejscie_token) <= '7' ) )
+            {
+                stan_nastepny = 4;
+
+
+            }
+
+
+        } else if ( stan_poprzedni == 1 )
+        {
+
+            if ( wejscie_token == '(' )
+            {
+                stan_nastepny = 4;
+            } else if ( priorytet_tokenu == '8' )
+            {
+                stan_nastepny = 4;
+            } else if ( jaki_priorytet_opa_2(wejscie_token) == '9' )
+            {
+                stan_nastepny = 4 ;
+            } else if ( wejscie_token == ')' )
+            {
+                stan_nastepny = 1;
+
+            }else if ( (jaki_priorytet_opa_2(wejscie_token) >= '0' ) &&  (jaki_priorytet_opa_2(wejscie_token) <= '7' ) )
+            {
+                stan_nastepny = 0 ;
+
+            }
+
+        } else if ( stan_poprzedni == 2 )
+        {
+
+            if ( wejscie_token == '(' )
+            {
+                stan_nastepny = 0;
+            } else if ( priorytet_tokenu == '8' )
+            {
+                stan_nastepny = 2;
+            } else if ( jaki_priorytet_opa_2(wejscie_token) == '9' )
+            {
+                stan_nastepny = 1 ;
+            } else if ( wejscie_token == ')' )
+            {
+                stan_nastepny = 4;
+
+            }else if ( (jaki_priorytet_opa_2(wejscie_token) >= '0' ) &&  (jaki_priorytet_opa_2(wejscie_token) <= '7' ) )
+            {
+                stan_nastepny = 4;
+
+            }
+
+        }
+
+
+        return stan_nastepny ;
+    }
+
+
     public static void main(String[] args) {
 
 
@@ -170,6 +254,11 @@ public static boolean czy_to_operator( char in_char )
         ile_testow_STR = skaner.nextLine() ;
         int ile_testow = 0;
         ile_testow = Integer.parseInt(ile_testow_STR) ;
+
+        boolean czy_poprawne = true;
+        int ile_operandow = 0;
+        int ile_operatorow = 0;
+        int stan = 0;
 
 
         int i = 0;
@@ -199,6 +288,10 @@ public static boolean czy_to_operator( char in_char )
         while ( i < ile_testow)
         {
 
+            czy_poprawne = true ;
+            ile_operandow = 0;
+            ile_operatorow = 0;
+
             dlg_wyjscia = 5;
             wejscie = "";
             wejscie += skaner.nextLine() ;
@@ -208,14 +301,24 @@ public static boolean czy_to_operator( char in_char )
             if (  wejscie.charAt(0) == 'I' )
             {
                 wyjscie +="ONP: ";
-                while (j < wejscie.length())
+                while ( (j < wejscie.length()) && (czy_poprawne == true ))
                 {
                     czy_token_to_op = czy_to_operator(wejscie.charAt(j)) ;
                     ascii_int = wejscie.charAt(j);
 
+
+
                     if ( ( ( ascii_int >=97 ) && (ascii_int <= 122) ) || ( czy_to_operator(wejscie.charAt(j)) == true ) || ( ( wejscie.charAt(j) == '~' ) || ( wejscie.charAt(j) == '=' ) || ( wejscie.charAt(j) == '^' ) || ( wejscie.charAt(j) == '(' ) || ( wejscie.charAt(j) == ')' ) || ( wejscie.charAt(j) == '!' ) ) )
                     {
-                        if ( (czy_token_to_op == true ) ||  ( wejscie.charAt(j) == '(' )  ||  ( wejscie.charAt(j) ==  ')' ) )
+
+                        stan = automat_spr_inf(stan, wejscie.charAt(j)) ;
+                        if ( stan == 4 )
+                        {
+                            czy_poprawne = false ;
+                            wyjscie = "ONP: error" ;
+                        }
+
+                        if ( ( (czy_token_to_op == true ) ||  ( wejscie.charAt(j) == '(' )  ||  ( wejscie.charAt(j) ==  ')' )  || ( wejscie.charAt(j) == '=' ) || ( wejscie.charAt(j) == '^' ) ) && (czy_poprawne == true) )
                         {
 
 
@@ -236,28 +339,38 @@ public static boolean czy_to_operator( char in_char )
 
                                 if ( Stoss.is_empty() == false )
                                 {
-                                    while ( (jaki_priorytet_opa_2(Stoss.top_return()) >= jaki_priorytet_opa(wejscie.charAt(j)) ) && (jaki_priorytet_opa_2(Stoss.top_return()) != 'X' ))
+
+                                    if ( (wejscie.charAt(j) != '=') && ( wejscie.charAt(j) != '^' ) )
                                     {
-                                        wyjscie += Stoss.pop();
+                                        while ( (jaki_priorytet_opa_2(Stoss.top_return()) >= jaki_priorytet_opa_2(wejscie.charAt(j)) ) && (jaki_priorytet_opa_2(Stoss.top_return()) != 'X' ))
+                                        {
+
+                                            wyjscie += Stoss.pop();
+
+                                        }
+                                    } else if ( (wejscie.charAt(j) == '=') || ( wejscie.charAt(j) == '^' ))
+                                    {
+                                        while ( (jaki_priorytet_opa_2(Stoss.top_return()) > jaki_priorytet_opa_2(wejscie.charAt(j)) ) && (jaki_priorytet_opa_2(Stoss.top_return()) != 'X' ))
+                                        {
+                                            wyjscie += Stoss.pop();
+
+                                        }
+
                                     }
+
+
                                 }
                                 Stoss.insert( wejscie.charAt(j) );
                             }
 
 
 
-                        } else if ( ( wejscie.charAt(j) == '~' ) || ( wejscie.charAt(j) == '=' ) || ( wejscie.charAt(j) == '^' ) || ( wejscie.charAt(j) == '!' ) )
+                        } else if ( ( ( wejscie.charAt(j) == '~' ) || ( wejscie.charAt(j) == '!' ) ) && (czy_poprawne == true ) )
                         {
 
                             if ( wejscie.charAt(j) == '~' )
                             {
                                 Stoss.insert('~');
-                            } else if ( wejscie.charAt(j) == '=' )
-                            {
-                                Stoss.insert('=');
-                            } else if  ( wejscie.charAt(j) == '^' )
-                            {
-                                Stoss.insert('^');
                             } else if ( wejscie.charAt(j) == '!' )
                             {
                                 Stoss.insert('!');
@@ -265,7 +378,7 @@ public static boolean czy_to_operator( char in_char )
 
 
                         }
-                        else
+                        else if ( czy_poprawne == true  )
                         {
                             if ( ( wejscie.charAt(j) != '(' ) && ( wejscie.charAt(j) != ')'  )  )
                             {
@@ -284,11 +397,25 @@ public static boolean czy_to_operator( char in_char )
                     }
                     j++;
 
+
                 }
-                while (Stoss.is_empty() == false )
+
+                if ( czy_poprawne == true  )
                 {
-                    wyjscie += Stoss.pop();
+                    while (Stoss.is_empty() == false )
+                    {
+                        if ( Stoss.top_return() != '_' )
+                        {
+                            wyjscie += Stoss.pop();
+                        } else
+                        {
+                            Stoss.pop();
+                        }
+
+                    }
                 }
+
+
             } else if ( wejscie.charAt(0) == 'O' )
             {
 
@@ -301,16 +428,35 @@ public static boolean czy_to_operator( char in_char )
                     if ( ( ascii_int >= 48 ) && ( ascii_int <= 57  ) )
                     {
                         temp_1 += wejscie.charAt(kk);
+
+
+                        if ( ascii_int == 57 )
+                        {
+                            ile_operandow += 1;
+                        } else if ( ascii_int <= 55 )
+                        {
+                            ile_operatorow +=1;
+                        }
+
                     }
                     kk++;
                 }
+
                 wejscie = temp_1;
                 temp_1 = "";
                 wyjscie = "INF: ";
 
+                if ( (ile_operandow-1 ) != (ile_operatorow) )
+                {
+                    czy_poprawne = false;
+                    wyjscie = "INF: error";
+                }
+
+
+
                 j = 5;
                 dlg_wyjscia = 5 ;
-                while (j < wejscie.length())
+                while ( (j < wejscie.length() ) && ( czy_poprawne == true  ) )
                 {
                     temp_priorytet_wejscia = jaki_priorytet_opa_2(wejscie.charAt(j)) ;
 
@@ -444,26 +590,26 @@ public static boolean czy_to_operator( char in_char )
                                     }
                                     Stoss_priorytetow.pop() ;
                                 }
-;
+                                ;
                                 wyjscie = temp_1 + temp_2 + wejscie.charAt(j) + temp_3 ;
                                 Stoss_priorytetow.insert( temp_priorytet_wejscia );
                             }
                         } else
+                        {
+                            if ( dlg_wyjscia > 5  )
                             {
-                                if ( dlg_wyjscia > 5  )
-                                {
-                                    wyjscie += ',' ;
-                                    wyjscie += wejscie.charAt(j);
-                                    dlg_wyjscia += 2 ;
-                                    Stoss_priorytetow.insert(temp_priorytet_wejscia);
+                                wyjscie += ',' ;
+                                wyjscie += wejscie.charAt(j);
+                                dlg_wyjscia += 2 ;
+                                Stoss_priorytetow.insert(temp_priorytet_wejscia);
 
-                                } else
-                                {
-                                    wyjscie += wejscie.charAt(j);
-                                    dlg_wyjscia += 1 ;
-                                    Stoss_priorytetow.insert(temp_priorytet_wejscia);
-                                }
+                            } else
+                            {
+                                wyjscie += wejscie.charAt(j);
+                                dlg_wyjscia += 1 ;
+                                Stoss_priorytetow.insert(temp_priorytet_wejscia);
                             }
+                        }
                     } else
                     {
                         wyjscie += wejscie.charAt(j);
@@ -475,6 +621,8 @@ public static boolean czy_to_operator( char in_char )
                 }
             }
 
+            System.out.println(wyjscie);
+
             Stoss.clear_stack();
             Stoss_priorytetow.clear_stack();
             i++;
@@ -482,4 +630,5 @@ public static boolean czy_to_operator( char in_char )
     }
 
 }
+
 
