@@ -340,6 +340,7 @@ public class Source {
                                 if ( Stoss.is_empty() == false )
                                 {
 
+
                                     if ( (wejscie.charAt(j) != '=') && ( wejscie.charAt(j) != '^' ) )
                                     {
                                         while ( (jaki_priorytet_opa_2(Stoss.top_return()) >= jaki_priorytet_opa_2(wejscie.charAt(j)) ) && (jaki_priorytet_opa_2(Stoss.top_return()) != 'X' ))
